@@ -242,7 +242,7 @@ class PipelineWorker : public Nan::AsyncWorker {
         }
       }
       // Help ensure a final kernel-based reduction to prevent shrink aliasing
-      if (shrink_on_load > 1 && (xresidual == 1.0 || yresidual == 1.0)) {
+      if (shrink_on_load > 1 && (xresidual > 0.9 || yresidual > 0.9)) {
         shrink_on_load = shrink_on_load / 2;
         xfactor = xfactor * 2;
         yfactor = yfactor * 2;
@@ -291,7 +291,7 @@ class PipelineWorker : public Nan::AsyncWorker {
         }
       }
       // Help ensure a final kernel-based reduction to prevent shrink aliasing
-      if (xshrink > 1 && yshrink > 1 && (xresidual == 1.0 || yresidual == 1.0)) {
+      if (xshrink > 1 && yshrink > 1 && (xresidual > 0.9 || yresidual > 0.9)) {
         xshrink = xshrink / 2;
         yshrink = yshrink / 2;
         xresidual = static_cast<double>(xshrink) / xfactor;
