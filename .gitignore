@@ -12,5 +12,6 @@ vendor
 packaging/libvips*
 packaging/*.log
 !packaging/build
+.gitattributes
 .DS_Store
 .nyc_output

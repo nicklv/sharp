@@ -11,33 +11,33 @@ mkdir ${TARGET}
 export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${TARGET}/lib/pkgconfig"
 export PATH="${PATH}:${TARGET}/bin"
 export CPPFLAGS="-I${TARGET}/include"
-export LDFLAGS="-L${TARGET}/lib"
+export LDFLAGS="-L${TARGET}/lib -Wl,-rpath,'\$\$ORIGIN'"
 export CFLAGS="${FLAGS}"
 export CXXFLAGS="${FLAGS}"
 
 # Dependency version numbers
 VERSION_ZLIB=1.2.11
 VERSION_FFI=3.2.1
-VERSION_GLIB=2.53.1
+VERSION_GLIB=2.53.5
 VERSION_XML2=2.9.4
 VERSION_GSF=1.14.41
 VERSION_EXIF=0.6.21
 VERSION_LCMS2=2.8
-VERSION_JPEG=1.5.1
-VERSION_PNG16=1.6.29
+VERSION_JPEG=1.5.2
+VERSION_PNG16=1.6.32
 VERSION_WEBP=0.6.0
-VERSION_TIFF=4.0.7
-VERSION_ORC=0.4.26
-VERSION_GDKPIXBUF=2.36.6
+VERSION_TIFF=4.0.8
+VERSION_ORC=0.4.27
+VERSION_GDKPIXBUF=2.36.8
 VERSION_FREETYPE=2.8
-VERSION_EXPAT=2.2.0
-VERSION_FONTCONFIG=2.12.1
-VERSION_HARFBUZZ=1.4.6
+VERSION_EXPAT=2.2.3
+VERSION_FONTCONFIG=2.12.4
+VERSION_HARFBUZZ=1.4.8
 VERSION_PIXMAN=0.34.0
-VERSION_CAIRO=1.14.8
-VERSION_PANGO=1.40.5
+VERSION_CAIRO=1.14.10
+VERSION_PANGO=1.40.10
 VERSION_CROCO=0.6.12
-VERSION_SVG=2.40.17
+VERSION_SVG=2.40.18
 VERSION_GIF=5.1.4
 
 # Least out-of-sync Sourceforge mirror
@@ -103,7 +103,7 @@ autoreconf -fiv
 make install-strip
 
 mkdir ${DEPS}/png16
-curl -Ls http://${SOURCEFORGE_MIRROR}.dl.sourceforge.net/project/libpng/libpng16/${VERSION_PNG16}/libpng-${VERSION_PNG16}.tar.xz | tar xJC ${DEPS}/png16 --strip-components=1
+curl -Ls https://ftp-osl.osuosl.org/pub/libpng/src/libpng16/libpng-${VERSION_PNG16}.tar.xz | tar xJC ${DEPS}/png16 --strip-components=1
 cd ${DEPS}/png16
 ./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking
 make install-strip
@@ -116,11 +116,9 @@ cd ${DEPS}/webp
 make install-strip
 
 mkdir ${DEPS}/tiff
-curl -Ls http://download.osgeo.org/libtiff/tiff-${VERSION_TIFF}.tar.gz | tar xzC ${DEPS}/tiff --strip-components=1
-cd ${DEPS}/tiff
-# Apply patches for libtiff vulnerabilities reported since v4.0.7
 VERSION_TIFF_GIT_MASTER_SHA=$(curl -Ls https://api.github.com/repos/vadz/libtiff/git/refs/heads/master | jq -r '.object.sha' | head -c7)
-curl -Ls https://github.com/vadz/libtiff/compare/Release-v4-0-7...master.patch | patch -p1 -t || true
+curl -Ls https://github.com/vadz/libtiff/archive/${VERSION_TIFF_GIT_MASTER_SHA}.tar.gz | tar xzC ${DEPS}/tiff --strip-components=1
+cd ${DEPS}/tiff
 if [ -n "${CHOST}" ]; then autoreconf -fiv; fi
 ./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking --disable-mdi --disable-pixarlog --disable-cxx
 make install-strip
@@ -185,6 +183,7 @@ make install-strip
 mkdir ${DEPS}/pango
 curl -Ls https://download.gnome.org/sources/pango/1.40/pango-${VERSION_PANGO}.tar.xz | tar xJC ${DEPS}/pango --strip-components=1
 cd ${DEPS}/pango
+./autogen.sh
 ./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking
 make install-strip
 
@@ -207,7 +206,7 @@ cd ${DEPS}/gif
 make install-strip
 
 mkdir ${DEPS}/vips
-curl -Ls https://github.com/jcupitt/libvips/releases/download/v${VERSION_VIPS}/vips-${VERSION_VIPS}.tar.gz | tar xzC ${DEPS}/vips --strip-components=1
+curl -Ls https://github.com/jcupitt/libvips/releases/download/v${VERSION_VIPS}-alpha4/vips-${VERSION_VIPS}-3.tar.gz | tar xzC ${DEPS}/vips --strip-components=1
 cd ${DEPS}/vips
 ./configure --host=${CHOST} --prefix=${TARGET} --enable-shared --disable-static --disable-dependency-tracking \
   --disable-debug --disable-introspection --without-python --without-fftw \
